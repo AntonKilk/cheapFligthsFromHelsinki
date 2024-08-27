@@ -24,12 +24,16 @@ const getLDArticles = async () => {
   }
 };
 
-// getLDArticles().then((articles) => {
-//   articles.forEach((article) => {
-//     console.log(article.id);
-//   });
-// });
+/**
+ * Function to extract 'id' keys from an array of objects
+ * @param {object[]} articles - Array of objects containing articles
+ * @returns {string[]} - Array of IDs
+ */
+function extractIds(articles) {
+  return articles.map((article) => article.id);
+}
 
 module.exports = {
   getLDArticles,
+  extractIds,
 };

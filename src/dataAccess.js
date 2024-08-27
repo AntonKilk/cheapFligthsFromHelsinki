@@ -1,11 +1,9 @@
 const articles = require("./getArticles");
-const ldArticles = articles.getLDArticles();
 const { BlobServiceClient } = require("@azure/storage-blob");
-const { v1: uuidv1 } = require("uuid");
 require("dotenv").config();
 const { DefaultAzureCredential } = require("@azure/identity");
 
-async function azureAccess() {
+async function azureAccess(incomingArticlesIds) {
   try {
     const accountName = process.env.AZURE_STORAGE_ACCOUNT_NAME;
     if (!accountName) throw Error("Azure Storage accountName not found");
@@ -33,30 +31,36 @@ async function azureAccess() {
     }
 
     // Compare existing articles'IDs with new articles' IDs
-    // replace newIDs with input from scraped articles
     const articleIds = existingArticles.map((article) => article.id);
-    const uniqueIds = newIDs.filter((id) => !articleIds.includes(id));
-    const newEntries = uniqueIds.map((id) => ({
-      id,
-      dateCreated: new Date().toISOString(),
-    }));
+    const uniqueIds = getUniqueIds(incomingArticlesIds, articleIds);
 
     // Merge new entries with existing content
-    const updatedArticles = [...existingArticles, ...newEntries];
+    if (uniqueIds.length !== 0) {
+      const newEntries = uniqueIds.map((id) => ({
+        id,
+        dateCreated: new Date().toISOString(),
+      }));
+      const updatedArticles = [...existingArticles, ...newEntries];
 
-    // Upload updated content back to the blob
-    const updatedContent = JSON.stringify(updatedArticles, null, 2);
-    await blockBlobClient.upload(updatedContent, updatedContent.length);
+      // Upload updated content back to the blob
+      const updatedContent = JSON.stringify(updatedArticles, null, 2);
+      await blockBlobClient.upload(updatedContent, updatedContent.length);
 
-    console.log("New entries added successfully.");
+      console.log("New entries added successfully.");
+      return uniqueIds;
+    } else {
+      console.log("No new entries found.");
+      return [];
+    }
   } catch (err) {
     console.log(`Error: ${err.message}`);
   }
 }
 
-azureAccess()
-  .then(() => console.log("Done"))
-  .catch((ex) => console.log(ex.message));
+// Get unique IDs from incoming articles
+function getUniqueIds(incomingArticlesIds, existingArticlesIds) {
+  return incomingArticlesIds.filter((id) => !existingArticlesIds.includes(id));
+}
 
 // Convert stream to text
 async function streamToString(readable) {
@@ -67,22 +71,6 @@ async function streamToString(readable) {
   }
   return data;
 }
-
-/**
- * Function to get downloaded content and return an array of IDs
- * @param {string|object[]} downloadedContent - The downloaded content, either as a JSON string or an array of objects
- * @returns {string[]} - Array of IDs
- */
-function getArticleIds(existingContent) {
-  if (typeof existingContent === "string") {
-    existingContent = JSON.parse(existingContent);
-  } else {
-    throw Error("Invalid downloaded content");
-  }
-  return downloadedContent.map((article) => article.id);
-}
-
-const newIDs = ["2", "123", "456", "789", "1", "abc"];
 
 module.exports = {
   azureAccess,

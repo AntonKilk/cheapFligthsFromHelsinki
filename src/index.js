@@ -1,21 +1,26 @@
 const { azureAccess } = require("./dataAccess");
+const { getLDArticles, extractIds } = require("./getArticles");
+const { telegramBot } = require("./tgBot");
 
 async function main() {
-  await azureAccess();
+  // Fetch articles
+  const articles = await getLDArticles();
+  const incomingArticlesIds = extractIds(articles);
+  // Save unique articles IDs to Azure
+  azureAccess(incomingArticlesIds)
+    .then((uniqueIds) => {
+      // Send new articles to Telegram
+      if (uniqueIds.length !== 0) {
+        const newArticles = articles.filter((article) =>
+          uniqueIds.includes(article.id)
+        );
+        console.log("New articles found:");
+        console.log(newArticles);
+        telegramBot(newArticles);
+      } else {
+        console.log("No new articles found.");
+      }
+    })
+    .catch((ex) => console.log(ex.message));
 }
-// Create a function that enters the Azure blob storage
-// and fetches the json file that stores the article IDs
-
-// Create a function that gets articles IDs from fetched articles
-// and returns an array of unique IDs
-
-// Create a function that saves the unique IDs to the Azure blob storage
-
-// create function that gets fetched articles unique IDs
-// and returns object that stores articles with unique IDs
-
-// ldArticles.then((articles) => {
-//   articles.forEach((article) => {
-//     console.log(article.id);
-//   });
-// });
+main();
