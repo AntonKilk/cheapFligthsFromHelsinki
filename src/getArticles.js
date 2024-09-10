@@ -1,7 +1,6 @@
-const cheerio = require("cheerio");
-
+import * as cheerio from "cheerio";
 // lentodiilit
-const getLDArticles = async () => {
+export async function getArticles() {
   try {
     const response = await fetch("https://lentodiilit.fi/");
     const body = await response.text();
@@ -18,22 +17,18 @@ const getLDArticles = async () => {
       };
       articles.push(article);
     });
+    console.log("Articles fetched.");
     return articles;
   } catch (error) {
     console.error("Error fetching articles:", error);
   }
-};
+}
 
 /**
  * Function to extract 'id' keys from an array of objects
  * @param {object[]} articles - Array of objects containing articles
  * @returns {string[]} - Array of IDs
  */
-function extractIds(articles) {
+export function extractIds(articles) {
   return articles.map((article) => article.id);
 }
-
-module.exports = {
-  getLDArticles,
-  extractIds,
-};

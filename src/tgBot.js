@@ -1,7 +1,9 @@
-const TelegramBot = require("node-telegram-bot-api");
+import pkg from "node-telegram-bot-api";
+const TelegramBot = pkg;
+
 const token = process.env.TG_TOKEN;
 
-function telegramBot(newArticles) {
+export function sendToChat(newArticles) {
   const bot = new TelegramBot(token, { polling: true });
   newArticles.forEach((article) => {
     const message = `<b>${article.title}</b>\n<a href="${article.link}">${article.link}</a>\n${article.description}`;
@@ -13,7 +15,3 @@ function telegramBot(newArticles) {
 
   bot.stopPolling();
 }
-
-module.exports = {
-  telegramBot,
-};

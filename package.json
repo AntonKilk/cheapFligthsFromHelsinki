@@ -3,26 +3,22 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node ./index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@azure/identity": "^4.4.1",
-    "@azure/storage-blob": "^12.24.0",
+    "@aws-sdk/client-s3": "^3.645.0",
     "cheerio": "^1.0.0",
     "dotenv": "^16.4.5",
     "node-telegram-bot-api": "^0.66.0",
     "uuid": "^10.0.0"
   },
-  "devDependencies": {
-    "@eslint/js": "^9.9.1",
-    "eslint": "^9.9.1",
-    "globals": "^15.9.0"
-  }
+  "type": "module"
 }
