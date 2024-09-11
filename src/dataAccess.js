@@ -13,30 +13,36 @@ const objectKey = process.env.OBJECT_KEY;
 const client = new S3Client({});
 
 async function dataAccess(incomingArticlesIds) {
+
   let existingArticlesIds = [];
   // Check if the bucket and key exists
   try {
+    console.log(`Checking if bucket '${bucketName}' exists...`);
     await client.send(new HeadBucketCommand({ Bucket: bucketName }));
     console.log(`Bucket '${bucketName}' exists.`);
 
     try {
       // Check if the key exists
+      console.log(`Checking if key '${objectKey}' exists...`);
       await client.send(
         new HeadObjectCommand({ Bucket: bucketName, Key: objectKey }),
       );
 
       // Fetch existing articles
+      console.log(`Fetching existing article IDs...`);
       const response = await client.send(
         new GetObjectCommand({ Bucket: bucketName, Key: objectKey }),
       );
       const readable = response.Body;
       const existingContent = await streamToString(readable);
       existingArticlesIds = JSON.parse(existingContent);
-      console.log("Existing articles fetched successfully.");
+      console.log("Existing article IDs fetched successfully.");
       console.log(existingArticlesIds);
     } catch (error) {
       if (error.name === "NotFound") {
         // Key doesn't exist, create it
+        console.log(`Key '${objectKey}' not found.`);
+        console.log(`Creating new key '${objectKey}'...`);
         const keyName = process.env.OBJECT_KEY;
         const newObject = [];
 
@@ -59,7 +65,8 @@ async function dataAccess(incomingArticlesIds) {
       console.error(`Bucket ${bucketName} not found.`);
       return { error: `Bucket ${bucketName} not found.` };
     } else {
-      throw err;
+      console.error(`Error accessing bucket ${bucketName}:`, error);
+      throw new Error(`Unable to access bucket ${bucketName}: ${error.message}`);
     }
   }
 

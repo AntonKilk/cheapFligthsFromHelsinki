@@ -17,7 +17,8 @@ export async function getArticles() {
       };
       articles.push(article);
     });
-    console.log("Articles fetched.");
+    console.log("Articles fetched:");
+    console.log(articles);
     return articles;
   } catch (error) {
     console.error("Error fetching articles:", error);
